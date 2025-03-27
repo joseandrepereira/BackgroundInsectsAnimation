@@ -6,14 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Insetos Animados</title>
     <style>
+        /* Define o estilo do corpo da página */
         body {
-            background-color: #000000;
+            background-color: #000000; /* Fundo preto */
             padding: 0;
             margin: 0;
-            overflow: hidden;
+            overflow: hidden; /* Impede a rolagem */
             position: relative;
         }
 
+        /* Define o estilo do canvas onde os insetos serão desenhados */
         canvas {
             position: absolute;
             top: 0;
@@ -21,6 +23,7 @@
             z-index: 1;
         }
 
+        /* Estiliza os controles de quantidade de insetos */
         .controls {
             position: absolute;
             top: 20px;
@@ -30,6 +33,7 @@
             font-family: Arial, sans-serif;
         }
 
+        /* Define o tamanho do controle deslizante */
         input[type="range"] {
             width: 200px;
         }
@@ -37,8 +41,10 @@
 </head>
 
 <body>
+    <!-- Canvas onde os insetos serão desenhados -->
     <canvas id='world'></canvas>
 
+    <!-- Controles para ajustar a quantidade de insetos -->
     <div class="controls">
         <label for="insectRange">Quantidade de Insetos: </label>
         <input type="range" id="insectRange" min="1" max="50" value="1">
@@ -46,23 +52,32 @@
     </div>
 
     <script>
+        // Definição de variáveis globais
         var SCREEN_WIDTH = window.innerWidth;
         var SCREEN_HEIGHT = window.innerHeight;
-        var QUANTITY = 1;
+        var QUANTITY = 1; // Quantidade inicial de insetos
         var canvas, context, particles = [];
         var mouseX = SCREEN_WIDTH * 0.5;
         var mouseY = SCREEN_HEIGHT * 0.5;
 
+        // Inicializa o ambiente e eventos
         function init() {
             canvas = document.getElementById('world');
             if (canvas && canvas.getContext) {
                 context = canvas.getContext('2d');
+
+                // Adiciona eventos para detectar o movimento do mouse e a alteração do tamanho da janela
                 window.addEventListener('mousemove', documentMouseMoveHandler, false);
                 window.addEventListener('resize', windowResizeHandler, false);
+
+                // Cria os insetos e ajusta o tamanho do canvas
                 createParticles();
                 windowResizeHandler();
+
+                // Inicia o loop de animação
                 setInterval(loop, 1000 / 60);
 
+                // Adiciona evento para alterar a quantidade de insetos dinamicamente
                 document.getElementById('insectRange').addEventListener('input', function (e) {
                     var newQuantity = parseInt(e.target.value);
                     document.getElementById('insectCount').textContent = newQuantity;
@@ -71,23 +86,25 @@
             }
         }
 
+        // Cria insetos com propriedades aleatórias
         function createParticles() {
             var colors = ["rgba(255, 99, 71, 0.7)", "rgba(255, 165, 0, 0.7)", "rgba(34, 193, 195, 0.7)", "rgba(253, 29, 29, 0.7)", "rgba(131, 58, 180, 0.7)", "rgba(0, 255, 255, 0.7)"];
             for (var i = 0; i < QUANTITY; i++) {
                 particles.push({
-                    size: 5,
-                    position: { x: SCREEN_WIDTH - 50, y: SCREEN_HEIGHT + 10 }, // Inicia fora da tela, na parte inferior direita
-                    shift: { x: SCREEN_WIDTH - 50, y: SCREEN_HEIGHT + 10 },
-                    speed: 0.01 + Math.random() * 0.02, // Reduzindo a velocidade de movimento
-                    orbit: 30 + Math.random() * 20,
-                    angle: Math.random() * Math.PI * 2,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    rotationSpeed: 0.01 + Math.random() * 0.02,
-                    rotationDirection: Math.random() > 0.5 ? 1 : -1
+                    size: 5, // Tamanho do inseto
+                    position: { x: SCREEN_WIDTH - 50, y: SCREEN_HEIGHT + 10 }, // Posição inicial (fora da tela)
+                    shift: { x: SCREEN_WIDTH - 50, y: SCREEN_HEIGHT + 10 }, // Ponto para onde ele se moverá
+                    speed: 0.01 + Math.random() * 0.02, // Velocidade do inseto
+                    orbit: 30 + Math.random() * 20, // Raio da órbita ao redor do cursor
+                    angle: Math.random() * Math.PI * 2, // Ângulo inicial aleatório
+                    color: colors[Math.floor(Math.random() * colors.length)], // Cor aleatória
+                    rotationSpeed: 0.01 + Math.random() * 0.02, // Velocidade de rotação
+                    rotationDirection: Math.random() > 0.5 ? 1 : -1 // Direção de rotação (horário ou anti-horário)
                 });
             }
         }
 
+        // Ajusta a quantidade de insetos na tela
         function adjustParticles(newQuantity) {
             if (newQuantity > particles.length) {
                 // Adiciona novos insetos
@@ -103,22 +120,26 @@
             }
         }
 
+        // Remove insetos da tela
         function removeParticle(particle) {
-            particle.shift.x += (SCREEN_WIDTH - 50 - particle.shift.x) * 0.05; // Move para a parte de baixo direita
+            particle.shift.x += (SCREEN_WIDTH - 50 - particle.shift.x) * 0.05;
             particle.shift.y += (SCREEN_HEIGHT + 10 - particle.shift.y) * 0.05;
+
             setTimeout(function () {
                 var index = particles.indexOf(particle);
                 if (index > -1) {
                     particles.splice(index, 1);
                 }
-            }, 1000); // Remover do array após o tempo de animação
+            }, 1000); // Remove inseto do array após 1 segundo
         }
 
+        // Atualiza a posição do mouse
         function documentMouseMoveHandler(event) {
             mouseX = event.clientX;
             mouseY = event.clientY;
         }
 
+        // Ajusta o tamanho do canvas quando a janela é redimensionada
         function windowResizeHandler() {
             SCREEN_WIDTH = window.innerWidth;
             SCREEN_HEIGHT = window.innerHeight;
@@ -126,6 +147,7 @@
             canvas.height = SCREEN_HEIGHT;
         }
 
+        // Cria pegadas dos insetos na tela
         function leaveFootprint(x, y, color) {
             let footprint = document.createElement("div");
             footprint.style.position = "absolute";
@@ -137,37 +159,47 @@
             footprint.style.borderRadius = "50%";
             footprint.style.transform = `rotate(${Math.random() * 360}deg)`;
             document.body.appendChild(footprint);
+
+            // Remove a pegada após 3 segundos
             setTimeout(() => document.body.removeChild(footprint), 3000);
         }
 
+        // Função principal do loop de animação
         function loop() {
             context.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
             for (let i = 0; i < particles.length; i++) {
                 let p = particles[i];
 
-                // Movendo os insetos lentamente em direção ao ponto de entrada
+                // Movendo os insetos lentamente em direção ao cursor do mouse
                 p.shift.x += (mouseX - p.shift.x) * p.speed;
                 p.shift.y += (mouseY - p.shift.y) * p.speed;
 
+                // Calcula a posição do inseto em torno do mouse
                 p.angle += p.speed;
                 p.position.x = p.shift.x + Math.cos(p.angle) * p.orbit;
                 p.position.y = p.shift.y + Math.sin(p.angle) * p.orbit;
 
-                p.rotationDirection = p.rotationDirection === 1 ? 1 : -1;
+                // Define a direção de rotação
                 p.angle += p.rotationSpeed * p.rotationDirection;
 
+                // Desenha o inseto
                 context.fillStyle = p.color;
                 context.beginPath();
                 context.arc(p.position.x, p.position.y, p.size, 0, Math.PI * 2, true);
                 context.fill();
+
+                // Desenha as pernas do inseto
                 drawLegs(p.position.x, p.position.y);
 
+                // Deixa pegadas ocasionalmente
                 if (Math.random() < 0.05) {
                     leaveFootprint(p.position.x, p.position.y, p.color);
                 }
             }
         }
 
+        // Função para desenhar as pernas dos insetos
         function drawLegs(x, y) {
             context.strokeStyle = "#552200";
             context.lineWidth = 2;
@@ -182,6 +214,7 @@
             context.stroke();
         }
 
+        // Inicia o script quando a página carrega
         window.onload = init;
     </script>
 </body>
